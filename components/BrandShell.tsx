@@ -32,14 +32,33 @@ function IdeaWallLogo() {
 }
 
 export function BrandShell({ children }: { children: React.ReactNode }) {
-  const [musicEnabled, setMusicEnabled] = useState(false);
+  // Default ON — musik langsung mulai saat halaman dibuka
+  const [musicEnabled, setMusicEnabled] = useState(true);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const musicEnabledRef = useRef(true);
+
+  // Sinkronkan ref agar closure di listener selalu punya nilai terbaru
+  useEffect(() => {
+    musicEnabledRef.current = musicEnabled;
+  }, [musicEnabled]);
 
   useEffect(() => {
     const audio = new Audio("/Harvestmoon-sound.mp3");
     audio.loop = true;
     audio.preload = "auto";
     audioRef.current = audio;
+
+    // Coba langsung play; jika browser blokir (policy autoplay),
+    // tunggu gesture pertama user lalu coba lagi
+    void audio.play().catch(() => {
+      const resume = () => {
+        if (musicEnabledRef.current) {
+          void audio.play().catch(() => undefined);
+        }
+      };
+      document.addEventListener("click", resume, { once: true });
+      document.addEventListener("keydown", resume, { once: true });
+    });
 
     return () => {
       audio.pause();
@@ -49,7 +68,6 @@ export function BrandShell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!audioRef.current) return;
-
     if (musicEnabled) {
       void audioRef.current.play().catch(() => undefined);
     } else {

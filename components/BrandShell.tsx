@@ -1,77 +1,86 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
-const musicEmbedUrl =
-  "https://www.youtube.com/embed/Um42Na9sfOI?autoplay=1&mute=1&loop=1&playlist=Um42Na9sfOI&controls=0&showinfo=0&rel=0";
+function IdeaWallLogo() {
+  return (
+    <svg
+      width="42"
+      height="42"
+      viewBox="0 0 42 42"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+      <rect width="42" height="42" rx="11" fill="url(#logo-grad)" />
+      <rect x="18" y="8" width="16" height="18" rx="2.5" fill="white" fillOpacity="0.45" />
+      <rect x="8" y="14" width="16" height="20" rx="2.5" fill="white" fillOpacity="0.95" />
+      <rect x="11.5" y="18.5" width="9" height="2" rx="1" fill="#7c5cf6" />
+      <rect x="11.5" y="22.5" width="7" height="2" rx="1" fill="#9b8afb" />
+      <rect x="11.5" y="26.5" width="8" height="2" rx="1" fill="#bdb4fe" />
+      <circle cx="30" cy="22" r="3.5" fill="white" fillOpacity="0.8" />
+      <circle cx="30" cy="22" r="1.8" fill="#fbbf24" />
+      <defs>
+        <linearGradient id="logo-grad" x1="0" y1="0" x2="42" y2="42" gradientUnits="userSpaceOnUse">
+          <stop stopColor="#7c5cf6" />
+          <stop offset="1" stopColor="#4d24b3" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
 
 export function BrandShell({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
   const [musicEnabled, setMusicEnabled] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    const savedTheme = window.localStorage.getItem("ideawall-theme") as "light" | "dark" | null;
-    const systemPrefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const initialTheme = savedTheme ?? (systemPrefersDark ? "dark" : "light");
-    setTheme(initialTheme);
-    setMounted(true);
+    const audio = new Audio("/Harvestmoon-sound.mp3");
+    audio.loop = true;
+    audio.preload = "auto";
+    audioRef.current = audio;
+
+    return () => {
+      audio.pause();
+      audio.currentTime = 0;
+    };
   }, []);
 
   useEffect(() => {
-    if (!mounted) return;
+    if (!audioRef.current) return;
 
-    document.documentElement.setAttribute("data-theme", theme);
-    document.documentElement.classList.toggle("dark", theme === "dark");
-    window.localStorage.setItem("ideawall-theme", theme);
-  }, [mounted, theme]);
+    if (musicEnabled) {
+      void audioRef.current.play().catch(() => undefined);
+    } else {
+      audioRef.current.pause();
+    }
+  }, [musicEnabled]);
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(255,107,53,0.16),_transparent_35%),radial-gradient(circle_at_bottom_right,_rgba(15,91,216,0.14),_transparent_35%)] transition-colors duration-300">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/70 bg-white/80 px-4 py-3 shadow-[0_20px_60px_-30px_rgba(15,23,42,0.45)] backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-900/80">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 shadow-lg shadow-brand-500/20">
-              <span className="text-lg font-semibold text-white">B</span>
-            </div>
+        <header className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 shadow-lg backdrop-blur-xl">
+          <Link href="/" className="group flex items-center gap-3">
+            <IdeaWallLogo />
             <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.28em] text-brand-600 dark:text-brand-300">
+              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-400 transition-colors group-hover:text-brand-300">
                 BINAR
               </p>
-              <p className="text-sm text-slate-600 dark:text-slate-300">IdeaWall by BINAR</p>
+              <p className="text-sm font-semibold leading-tight text-white">IdeaWall</p>
             </div>
           </Link>
 
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setTheme((current) => (current === "light" ? "dark" : "light"))}
-              aria-label="Toggle day/night theme"
-              className="rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-            >
-              {theme === "light" ? "☀️ Day" : "🌙 Night"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setMusicEnabled((current) => !current)}
-              aria-label="Toggle background music"
-              className="rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-sm font-medium text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-brand-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
-            >
-              {musicEnabled ? "♫ On" : "♫ Off"}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => setMusicEnabled((value) => !value)}
+            className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+          >
+            {musicEnabled ? "🔊 Backsound On" : "🔈 Backsound Off"}
+          </button>
         </header>
 
-        <div className="flex-1">
-          <iframe
-            title="Background music"
-            className="pointer-events-none absolute left-0 top-0 h-0 w-0 opacity-0"
-            src={musicEnabled ? musicEmbedUrl : undefined}
-            allow="autoplay"
-          />
-          {children}
-        </div>
+        <div className="flex-1">{children}</div>
       </div>
     </div>
   );

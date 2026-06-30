@@ -2,7 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  color-scheme: light;
+  --font-poppins: "Poppins", sans-serif;
+}
+
 html,
 body {
   height: 100%;
+  font-family: var(--font-poppins);
+}
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  transition: background-color 0.3s ease, color 0.3s ease;
 }

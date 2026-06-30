@@ -60,11 +60,13 @@ export function BrandShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-950">
       <div className="mx-auto flex min-h-screen max-w-7xl flex-col px-4 py-4 sm:px-6 lg:px-8">
-        <header className="mb-6 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/5 px-5 py-3 shadow-lg backdrop-blur-xl">
+        <header className="mb-6 flex items-center justify-between gap-3 rounded-[24px] border border-white/10 bg-white/10 px-5 py-3 shadow-[0_18px_50px_-24px_rgba(15,23,42,0.85)] backdrop-blur-xl">
           <Link href="/" className="group flex items-center gap-3">
-            <IdeaWallLogo />
+            <div className="rounded-2xl border border-white/15 bg-gradient-to-br from-brand-500/80 to-brand-700/90 p-1.5 shadow-lg shadow-brand-900/20">
+              <IdeaWallLogo />
+            </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.3em] text-brand-400 transition-colors group-hover:text-brand-300">
+              <p className="text-[11px] font-bold uppercase tracking-[0.35em] text-brand-300 transition-colors group-hover:text-brand-200">
                 BINAR
               </p>
               <p className="text-sm font-semibold leading-tight text-white">IdeaWall</p>
@@ -74,9 +76,14 @@ export function BrandShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             onClick={() => setMusicEnabled((value) => !value)}
-            className="rounded-full border border-white/15 bg-white/10 px-3 py-2 text-sm font-medium text-white transition hover:bg-white/20"
+            className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-2 text-sm font-semibold transition-all duration-200 ${
+              musicEnabled
+                ? "border-amber-300/40 bg-amber-400/20 text-amber-100 shadow-[0_0_0_1px_rgba(253,230,138,0.25)]"
+                : "border-white/15 bg-white/10 text-slate-100 hover:bg-white/20"
+            }`}
           >
-            {musicEnabled ? "🔊 Backsound On" : "🔈 Backsound Off"}
+            <span className="text-base">{musicEnabled ? "♫" : "♪"}</span>
+            <span>{musicEnabled ? "Backsound On" : "Backsound Off"}</span>
           </button>
         </header>
 

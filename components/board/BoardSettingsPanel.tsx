@@ -68,9 +68,9 @@ export function BoardSettingsPanel({ board }: { board: Board }) {
             <span>Tampilkan nama penulis sticky note ke peserta</span>
             <input
               type="checkbox"
-              checked={board.is_anonymous}
+              checked={!board.is_anonymous}
               disabled={busy}
-              onChange={(e) => patch({ is_anonymous: e.target.checked })}
+              onChange={(e) => patch({ is_anonymous: !e.target.checked })}
               className="h-4 w-4 accent-brand-600"
             />
           </label>

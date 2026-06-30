@@ -13,7 +13,7 @@ export async function POST(
 
   const { data: section, error: sectionError } = await admin
     .from("board_sections")
-    .select("id, type, board_id, config")
+    .select("id, type, board_id, config, boards!inner(status)")
     .eq("id", params.sectionId)
     .maybeSingle();
 
@@ -21,6 +21,14 @@ export async function POST(
   if (!section) return NextResponse.json({ error: "Section tidak ditemukan" }, { status: 404 });
   if (section.type !== "poll") {
     return NextResponse.json({ error: "Section ini bukan poll" }, { status: 400 });
+  }
+
+  // @ts-expect-error joined relation typing
+  if (section.boards.status === "archived") {
+    return NextResponse.json(
+      { error: "Board ini sudah ditutup, tidak bisa voting baru" },
+      { status: 403 }
+    );
   }
 
   const config = section.config as PollConfig;

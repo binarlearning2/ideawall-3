@@ -16,7 +16,7 @@ export function generateJoinCode(length = 6): string {
 }
 
 export function isValidJoinCodeFormat(code: string): boolean {
-  return /^[A-Z2-9]{6}$/.test(code.toUpperCase());
+  return /^[ABCDEFGHJKLMNPQRSTUVWXYZ23456789]{6}$/.test(code.toUpperCase());
 }
 
 export function clampText(value: unknown, maxLength: number): string | null {

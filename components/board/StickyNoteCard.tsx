@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { StickyNote } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +27,11 @@ export function StickyNoteCard({
 }: StickyNoteCardProps) {
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(note.content);
+
+  // Keep draft in sync with incoming realtime updates when not actively editing.
+  useEffect(() => {
+    if (!editing) setDraft(note.content);
+  }, [note.content, editing]);
 
   function handleSave() {
     const trimmed = draft.trim();

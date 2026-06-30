@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { SectionTabs } from "@/components/board/SectionTabs";
 import { AddSectionForm } from "@/components/board/AddSectionForm";
@@ -47,6 +47,8 @@ export function BoardContainer({
   const [activeSectionId, setActiveSectionId] = useState<string | null>(
     [...initialSections].sort((a, b) => a.order_index - b.order_index)[0]?.id ?? null
   );
+  // Tracks this board's section IDs for filtering cross-board realtime events.
+  const boardSectionIdsRef = useRef(new Set(initialSections.map((s) => s.id)));
 
   // ---- Realtime subscription (PRD §9.2): one channel per board ----
   useEffect(() => {
@@ -88,6 +90,7 @@ export function BoardContainer({
         (payload) => {
           if (payload.eventType === "INSERT") {
             const newSection = payload.new as BoardSection;
+            boardSectionIdsRef.current.add(newSection.id);
             setSections((prev) =>
               prev.some((s) => s.id === newSection.id) ? prev : [...prev, newSection]
             );
@@ -97,8 +100,16 @@ export function BoardContainer({
             setSections((prev) => prev.map((s) => (s.id === updated.id ? updated : s)));
           } else if (payload.eventType === "DELETE") {
             const removed = payload.old as { id: string };
-            setSections((prev) => prev.filter((s) => s.id !== removed.id));
-            setActiveSectionId((current) => (current === removed.id ? null : current));
+            boardSectionIdsRef.current.delete(removed.id);
+            setSections((prev) => {
+              const remaining = prev.filter((s) => s.id !== removed.id);
+              // Auto-select the first remaining section so the board doesn't go blank.
+              setActiveSectionId((current) => {
+                if (current !== removed.id) return current;
+                return [...remaining].sort((a, b) => a.order_index - b.order_index)[0]?.id ?? null;
+              });
+              return remaining;
+            });
           }
         }
       )
@@ -113,6 +124,8 @@ export function BoardContainer({
         (payload) => {
           if (payload.eventType === "INSERT") {
             const opt = payload.new as PollOption;
+            // Only accept options belonging to this board's sections.
+            if (!boardSectionIdsRef.current.has(opt.section_id)) return;
             setPollOptions((prev) => (prev.some((o) => o.id === opt.id) ? prev : [...prev, opt]));
           } else if (payload.eventType === "UPDATE") {
             const opt = payload.new as PollOption;

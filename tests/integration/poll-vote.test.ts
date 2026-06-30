@@ -20,6 +20,7 @@ const openSingleChoiceSection = {
   type: "poll",
   board_id: "board-1",
   config: { question: "Q?", vote_type: "single", is_open: true },
+  boards: { status: "active" },
 };
 
 const openMultiChoiceSection = {
@@ -61,7 +62,7 @@ describe("POST /api/sections/[sectionId]/vote", () => {
       buildMockClient({
         fromResponses: [
           {
-            data: { ...openSingleChoiceSection, config: { ...openSingleChoiceSection.config, is_open: false } },
+            data: { ...openSingleChoiceSection, config: { ...openSingleChoiceSection.config, is_open: false }, boards: { status: "active" } },
             error: null,
           },
         ],

@@ -12,3 +12,4 @@ playwright-report
 playwright/.cache
 coverage
 .DS_Store
+.vercel

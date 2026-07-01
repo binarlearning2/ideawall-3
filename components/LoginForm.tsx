@@ -16,10 +16,14 @@ export function LoginForm() {
     setErrorMessage("");
 
     const supabase = createClient();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+    const redirectTo = new URL("/auth/callback", siteUrl);
+    redirectTo.searchParams.set("next", "/boards");
+
     const { error } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback?next=/boards`,
+        emailRedirectTo: redirectTo.toString(),
       },
     });
 

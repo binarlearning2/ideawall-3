@@ -13,6 +13,10 @@ function storageKeyName(boardId: string) {
   return `ideawall:name:${boardId}`;
 }
 
+function storageKeyParticipants(boardId: string) {
+  return `ideawall:participants:${boardId}`;
+}
+
 export function getOrCreateSessionId(boardId: string): string {
   if (typeof window === "undefined") return "";
   const key = storageKey(boardId);
@@ -36,4 +40,33 @@ export function setStoredName(boardId: string, name: string) {
 
 export function hasJoined(boardId: string): boolean {
   return !!getStoredName(boardId);
+}
+
+export function getBoardParticipantNames(boardId: string): string[] {
+  if (typeof window === "undefined") return [];
+
+  const raw = window.localStorage.getItem(storageKeyParticipants(boardId));
+  if (!raw) return [];
+
+  try {
+    const parsed = JSON.parse(raw) as string[];
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+export function addBoardParticipant(boardId: string, name: string, limit = 40) {
+  if (typeof window === "undefined") {
+    return { ok: false, error: "Window is not available" } as const;
+  }
+
+  const existing = getBoardParticipantNames(boardId);
+  if (existing.length >= limit) {
+    return { ok: false, error: `Board ini sudah penuh, maksimal ${limit} siswa.` } as const;
+  }
+
+  const next = [...existing, name];
+  window.localStorage.setItem(storageKeyParticipants(boardId), JSON.stringify(next));
+  return { ok: true, names: next } as const;
 }

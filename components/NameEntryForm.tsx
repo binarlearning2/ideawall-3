@@ -1,15 +1,17 @@
 "use client";
 
 import { useState } from "react";
+import { addBoardParticipant } from "@/lib/session";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 interface NameEntryFormProps {
   boardTitle: string;
+  boardId: string;
   onJoin: (name: string) => void;
 }
 
-export function NameEntryForm({ boardTitle, onJoin }: NameEntryFormProps) {
+export function NameEntryForm({ boardTitle, boardId, onJoin }: NameEntryFormProps) {
   const [name, setName] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -20,6 +22,13 @@ export function NameEntryForm({ boardTitle, onJoin }: NameEntryFormProps) {
       setErrorMessage("Nama wajib diisi (maksimal 50 karakter)");
       return;
     }
+
+    const result = addBoardParticipant(boardId, trimmed, 40);
+    if (!result.ok) {
+      setErrorMessage(result.error);
+      return;
+    }
+
     onJoin(trimmed);
   }
 

@@ -30,6 +30,7 @@ export function ParticipantBoardClient(props: ParticipantBoardClientProps) {
     return (
       <NameEntryForm
         boardTitle={props.board.title}
+        boardId={props.board.id}
         onJoin={(joinedName) => {
           setStoredName(props.board.id, joinedName);
           setName(joinedName);

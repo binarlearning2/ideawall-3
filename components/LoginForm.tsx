@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
+const FACILITATOR_NAME_KEY = "ideawall:facilitator:name";
+
 export function LoginForm() {
   const router = useRouter();
   const [name, setName] = useState("");
@@ -23,16 +25,7 @@ export function LoginForm() {
     setErrorMessage("");
 
     try {
-      const response = await fetch("/api/auth/anonymous-profile", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ displayName: trimmed }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Gagal masuk");
-      }
-
+      localStorage.setItem(FACILITATOR_NAME_KEY, trimmed);
       router.push("/boards");
     } catch {
       setStatus("idle");

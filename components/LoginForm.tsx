@@ -1,73 +1,68 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const router = useRouter();
+  const [name, setName] = useState("");
+  const [status, setStatus] = useState<"idle" | "submitting">("idle");
   const [errorMessage, setErrorMessage] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setStatus("sending");
-    setErrorMessage("");
-
-    const supabase = createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
-    const redirectTo = new URL("/auth/callback", siteUrl);
-    redirectTo.searchParams.set("next", "/boards");
-
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: redirectTo.toString(),
-      },
-    });
-
-    if (error) {
-      setStatus("error");
-      setErrorMessage(error.message);
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length > 50) {
+      setErrorMessage("Nama wajib diisi (maksimal 50 karakter)");
       return;
     }
 
-    setStatus("sent");
-  }
+    setStatus("submitting");
+    setErrorMessage("");
 
-  if (status === "sent") {
-    return (
-      <div className="rounded-lg border border-brand-200 bg-brand-50 p-4 text-sm text-brand-800">
-        Link login sudah dikirim ke <strong>{email}</strong>. Cek inbox kamu dan klik link-nya
-        untuk masuk.
-      </div>
-    );
+    try {
+      const response = await fetch("/api/auth/anonymous-profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ displayName: trimmed }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Gagal masuk");
+      }
+
+      router.push("/boards");
+    } catch {
+      setStatus("idle");
+      setErrorMessage("Gagal masuk. Coba lagi.");
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <label htmlFor="email" className="block text-sm font-medium text-slate-700">
-        Email
+      <label htmlFor="name" className="block text-sm font-medium text-slate-700">
+        Nama fasilitator
       </label>
       <Input
-        id="email"
-        type="email"
+        id="name"
         required
-        placeholder="kamu@perusahaan.com"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
+        placeholder="Nama kamu"
+        value={name}
+        maxLength={50}
+        onChange={(e) => setName(e.target.value)}
       />
-      {status === "error" && (
+      {errorMessage && (
         <p className="text-sm text-red-600" role="alert">
           {errorMessage}
         </p>
       )}
-      <Button type="submit" disabled={status === "sending"} className="w-full">
-        {status === "sending" ? "Mengirim link..." : "Kirim link login"}
+      <Button type="submit" disabled={status === "submitting"} className="w-full">
+        {status === "submitting" ? "Masuk..." : "Masuk tanpa email"}
       </Button>
       <p className="text-xs text-slate-500">
-        Tanpa password — kami kirim link login ke email kamu (passwordless).
+        Cukup tulis nama, tanpa login email atau verifikasi.
       </p>
     </form>
   );
